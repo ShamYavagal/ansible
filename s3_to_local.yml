@@ -1,0 +1,32 @@
+
+- hosts: ec2-instances
+  remote_user: sniopsadmin
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Delete Dir
+      file:
+        path: /etc/ssh/authorized_keys
+        state: absent
+
+    - name: Create Dir
+      file: path=/etc/ssh/authorized_keys state=directory
+
+    - name: get s3 bucket items
+      aws_s3:
+        mode: list
+        aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+        bucket: sniopsansible
+      register: s3_bucket_items
+    
+    - name: Copy objects from S3
+      aws_s3:
+        mode: get
+        aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+        bucket: sniopsansible
+        object: "{{ item }}"
+        dest: "/etc/ssh/authorized_keys/{{ item|basename }}"
+      with_items: "{{ s3_bucket_items.s3_keys }}"

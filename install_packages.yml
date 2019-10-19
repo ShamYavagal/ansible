@@ -1,0 +1,12 @@
+---
+- hosts: "{{ var_host }}"
+  tasks: 
+    - name: install epel
+      yum: name={{item}} state=present
+      with_items:
+      - epel-release
+    - name: install nginx
+      yum: name={{item}} state=present
+      with_items:
+      - nginx
+      - htop

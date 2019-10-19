@@ -1,0 +1,36 @@
+---
+- hosts: add-hosts
+  remote_user: ec2-user
+  become: yes
+
+  vars:
+    password: Sh45.VpmzsPiU
+
+  tasks:
+    - name: Update Sudoers
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: Add Two Factor Autentuication
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        state: present
+        line: 'AuthenticationMethods "publickey,password" "publickey,keyboard-interactive"'
+
+    - name: remove Password Authentication
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        state: absent
+        line: 'PasswordAuthentication no'
+   
+
+    - name: Create User
+      user: name=jon password={{password}}
+
+    - name: Add User To Wheel Group
+      user: name=jdoe groups=wheel append=yes state=present createhome=yes
+

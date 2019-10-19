@@ -1,0 +1,30 @@
+---
+- hosts: all
+  become: yes
+  tasks: 
+    - name: install cloudwatch-agent-centos
+      yum:      
+        name: https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+        state: present
+      #when: ansible_distribution == "Amazon"
+    - name: install cloudwatch-agent-amazon
+      yum:
+        name: https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm
+        state: present
+      when: ansible_distribution == "CentOS"
+    - name: install ssm-agent
+      yum:      
+        name: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+        state: present
+    - name: install epel
+      yum:       
+        name: epel-release
+        state: present
+    - name: Downloads Inspector_Agent_Install_Script
+      get_url:      
+        url: https://inspector-agent.amazonaws.com/linux/latest/install
+        dest: /tmp
+        mode: '777'
+    - name: Execute the Inspector_Shell_Script
+      shell: /tmp/install
+

@@ -1,0 +1,13 @@
+---
+- hosts: gluster
+  tasks:
+    - name: Update SMB Config File
+      lineinfile:
+        path: /etc/samba/smb.conf
+        regexp: '{{ item.regexp }}'
+        state: absent
+        line: '{{ item.line }}'
+      with_items:
+        - { regexp: '^security mask', line: 'security mask = 774' }
+        - { regexp: '^directory security mask', line: 'directory security mask = 2775' }
+        - { regexp: '^force directory security mode', line: 'force directory security mode = 2775' }
